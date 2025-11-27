@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 // Proxy list - add your real proxies here
@@ -18,10 +19,19 @@ var proxies = []string{
 	// "http://username:password@proxy2.example.com:8080", 
 	// "http://username:password@proxy3.example.com:8080",
 	
-	// For testing, you can use free proxies (less reliable):
-	"http://162.55.8.72:52527",
-	"http://185.162.70.205:8382",
-	"http://190.2.143.87:999",
+	// Premium residential proxies (best for Telegram):
+	// "http://user:pass@residential.provider.com:8080",
+	
+	// Datacenter proxies (good for testing):
+	// "http://user:pass@datacenter.provider.com:8080",
+	
+	// Working free proxies (test these first):
+	"http://45.8.179.247:8080",
+	"http://45.130.40.133:8080",
+	"http://185.199.229.156:3128",
+	
+	// If none work, use direct connection (no proxy)
+	"DIRECT",
 }
 
 var currentProxyIndex = 0
@@ -43,17 +53,25 @@ func handleProxyRequest(w http.ResponseWriter, r *http.Request) {
 	proxyURL := getNextProxy()
 	log.Printf("Using proxy: %s", proxyURL)
 	
-	// Parse proxy URL
-	proxy, err := url.Parse(proxyURL)
-	if err != nil {
-		log.Printf("Invalid proxy URL: %s", err)
-		http.Error(w, "Invalid proxy configuration", http.StatusInternalServerError)
-		return
-	}
+	var transport *http.Transport
 	
-	// Create proxy transport
-	transport := &http.Transport{
-		Proxy: http.ProxyURL(proxy),
+	// Handle DIRECT connection (no proxy)
+	if proxyURL == "DIRECT" {
+		log.Printf("Using direct connection (no proxy)")
+		transport = &http.Transport{}
+	} else {
+		// Parse proxy URL
+		proxy, err := url.Parse(proxyURL)
+		if err != nil {
+			log.Printf("Invalid proxy URL: %s", err)
+			http.Error(w, "Invalid proxy configuration", http.StatusInternalServerError)
+			return
+		}
+		
+		// Create proxy transport
+		transport = &http.Transport{
+			Proxy: http.ProxyURL(proxy),
+		}
 	}
 	
 	// Create new request with the same method and headers
@@ -78,11 +96,14 @@ func handleProxyRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	// Make request through proxy
-	client := &http.Client{Transport: transport}
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   30 * time.Second, // Add timeout
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Proxy request failed: %s", err)
-		http.Error(w, "Proxy request failed", http.StatusBadGateway)
+		http.Error(w, fmt.Sprintf("Proxy request failed: %s", err), http.StatusBadGateway)
 		return
 	}
 	defer resp.Body.Close()
