@@ -10,13 +10,15 @@ import (
 func main() {
 	// Simple handler that responds to everything
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Request received: %s %s", r.Method, r.URL.Path)
+		log.Printf("Request received: %s %s from %s", r.Method, r.URL.Path, r.Host)
+		
+		// Always return 200 OK for health checks
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		
 		if r.URL.Path == "/health" {
-			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintf(w, `{"status":"ok"}`)
+			fmt.Fprintf(w, `{"status":"ok","message":"healthy"}`)
 		} else {
-			w.Header().Set("Content-Type", "application/json")
 			fmt.Fprintf(w, `{"status":"working","message":"proxy active"}`)
 		}
 	})
@@ -29,6 +31,7 @@ func main() {
 	
 	log.Printf("🚀 Server starting on port %s", port)
 	log.Printf("📊 Health check: http://localhost:%s/health", port)
+	log.Printf("🔍 Accepting requests from healthcheck.railway.app")
 	
 	// Start server
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
