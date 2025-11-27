@@ -11,6 +11,7 @@ restartPolicyMaxRetries = 10
 [build.env]
 CGO_ENABLED = "0"
 GOOS = "linux"
+PORT = "8000"
 
 [[services]]
 name = "rota-proxy"

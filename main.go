@@ -41,8 +41,13 @@ func main() {
 		port = "8000"
 	}
 	
+	log.Printf("🚀 Starting Rota Proxy Server...")
+	log.Printf("📍 PORT from environment: %s", os.Getenv("PORT"))
+	log.Printf("🔧 Using port: %s", port)
+	
 	// Health endpoint
 	http.HandleFunc("/health", healthHandler)
+	log.Printf("✅ Registered /health endpoint")
 	
 	// Proxy endpoint
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -52,12 +57,14 @@ func main() {
 			http.NotFound(w, r)
 		}
 	})
+	log.Printf("✅ Registered / proxy endpoint")
 	
-	log.Printf("🚀 Rota Proxy Server starting on port %s", port)
-	log.Printf("📊 Health: http://localhost:%s/health", port)
-	log.Printf("🔄 Proxy: http://localhost:%s/", port)
+	log.Printf("🚀 Server starting on port %s", port)
+	log.Printf("📊 Health check available at: http://localhost:%s/health", port)
+	log.Printf("🔄 Proxy available at: http://localhost:%s/", port)
 	
+	// Test the health endpoint locally
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatal("Server failed to start:", err)
+		log.Fatal("❌ Server failed to start:", err)
 	}
 }
