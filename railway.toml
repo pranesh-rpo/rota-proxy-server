@@ -4,31 +4,5 @@ builder = "nixpacks"
 [deploy]
 startCommand = "go run main.go"
 healthcheckPath = "/health"
-healthcheckTimeout = 100
+healthcheckTimeout = 30
 restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 10
-
-[build.env]
-CGO_ENABLED = "0"
-GOOS = "linux"
-PORT = "8000"
-
-[[services]]
-name = "rota-proxy"
-
-cpu = "0.25"
-memory = "256"
-
-[services.concurrency]
-type = "connections"
-hardLimit = 25
-softLimit = 20
-
-[[services.ports]]
-port = 8000
-targetPort = 8000
-
-[[services.env]]
-PROXY_PORT = "8000"
-API_PORT = "8001"
-LOG_LEVEL = "info"
