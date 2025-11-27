@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 )
 
 type ProxyResponse struct {
@@ -34,6 +35,12 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// Use Railway's PORT environment variable or default to 8000
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+	
 	// Health endpoint
 	http.HandleFunc("/health", healthHandler)
 	
@@ -46,11 +53,11 @@ func main() {
 		}
 	})
 	
-	log.Println("🚀 Rota Proxy Server starting on :8000")
-	log.Println("📊 Health: http://localhost:8000/health")
-	log.Println("🔄 Proxy: http://localhost:8000/")
+	log.Printf("🚀 Rota Proxy Server starting on port %s", port)
+	log.Printf("📊 Health: http://localhost:%s/health", port)
+	log.Printf("🔄 Proxy: http://localhost:%s/", port)
 	
-	if err := http.ListenAndServe(":8000", nil); err != nil {
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}
 }

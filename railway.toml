@@ -27,19 +27,7 @@ softLimit = 20
 port = 8000
 targetPort = 8000
 
-[[services.ports]]
-port = 8001
-targetPort = 8001
-
 [[services.env]]
 PROXY_PORT = "8000"
 API_PORT = "8001"
 LOG_LEVEL = "info"
-DB_HOST = "${{RAILWAY_PRIVATE_SERVICE_HOSTNAME}}"
-DB_PORT = "5432"
-DB_USER = "rota"
-DB_PASSWORD = "rota_password"
-DB_NAME = "rota"
-DB_SSLMODE = "disable"
-ROTA_ADMIN_USER = "admin"
-ROTA_ADMIN_PASSWORD = "your_admin_password"
